@@ -1,0 +1,75 @@
+from django.http import HttpResponse
+from django.shortcuts import render
+
+def index(request):
+    params = {'message':'Welcome To Text Utils.', 'text':'You can Edit your text'}
+    return render(request,'index.html',params)
+
+def links(request):
+    s = '''<table border="1">
+    <tr><td><a href="https://www.indiabix.com/"> sanjay</a></td><td>Click</td></tr>
+    </table>
+    '''
+    return HttpResponse(s)
+
+def analyze(request):
+    retext = request.POST.get('text','default')# get text
+    removepunc = request.POST.get('removepunc','off')
+    newlineremover = request.POST.get('newlineremover','off')
+    extraspaceremover = request.POST.get('extraspaceremover','off')
+    fullcaps = request.POST.get('fullcaps','off')
+    analyzed = ""
+    purpose = ""
+    charcount = 0
+    appliedAnalyzer=0
+    for char in retext:
+        if char != " " and char!="\r" and char !="\n":
+            charcount += 1
+
+    if(removepunc=="on"):
+        punctuations = '''!()-[]{};:'"\,<>./?@#$%^&*_~'''
+        #analyzed = retext
+        charcount=0
+        for char in retext:
+            if char not in punctuations:
+                analyzed = analyzed + char
+            if char not in punctuations and char != " " and char != "\r" and char != "\n":
+                charcount+=1
+        appliedAnalyzer=1
+        retext = analyzed
+        purpose = "Remove Punctuation,"
+
+    if(fullcaps=="on"):
+        analyzed = ""
+        for char in retext:
+            analyzed = analyzed + char.upper()
+        appliedAnalyzer=1
+        retext = analyzed
+        purpose = purpose +" Capital Alphabet,"
+
+    if(newlineremover=="on"):
+        analyzed = ""
+        for char in retext:
+            if char!="\n" and char!="\r":
+                analyzed =analyzed + char
+        retext = analyzed
+        appliedAnalyzer=1
+        purpose = purpose +" New line remover,"
+
+    if(extraspaceremover == "on"):
+        analyzed = ""
+        for index,char in enumerate(retext):
+            if not(retext[index] == " " and retext[index+1]==" "):
+                analyzed = analyzed + char
+        appliedAnalyzer=1
+        purpose = purpose + " Extra space remover"
+
+
+    if(appliedAnalyzer):
+        params = {'purpose': purpose, 'analyzed_text': analyzed, 'charcount': charcount}
+        print(analyzed)
+        return render(request, 'analyze.html', params)
+
+    else:
+        params = {'message':"You haven't choose any Option.",'text':"Please choose your Analyser option"}
+        return render(request, 'index.html',params)

@@ -1,0 +1,65 @@
+from django.http import HttpResponse
+from django.shortcuts import render
+
+def index(request):
+    # return HttpResponse('''<h1>hello</h1> <a href="https://www.indiabix.com/"> sanjay</a>''')
+    params = {'name':'sanjay', 'place':'chandigarh'}
+    return render(request,'index.html',params)
+
+def links(request):
+    s = '''<table border="1">
+    <tr><td><a href="https://www.indiabix.com/"> sanjay</a></td><td>Click</td></tr>
+    </table>
+    '''
+    return HttpResponse(s)
+
+def analyze(request):
+    # print(request.GET.get('text','default'))
+    retext = request.GET.get('text','default')# get text
+    removepunc = request.GET.get('removepunc','off')
+    newlineremover = request.GET.get('newlineremover','off')
+    extraspaceremover = request.GET.get('extraspaceremover','off')
+    fullcaps = request.GET.get('fullcaps','off')
+    print(removepunc)
+    print(retext)
+
+    if(removepunc=="on"):
+        punctuations = '''!()-[]{};:'"\,<>./?@#$%^&*_~'''
+        analyzed = ""
+        #analyzed = retext
+        for char in retext:
+            if char not in punctuations:
+                analyzed = analyzed + char
+
+        params = {'purpose':'Removed Punctuations','analyzed_text':analyzed}
+        # return HttpResponse("Remove punc")
+        return render(request,'analyze.html',params)
+
+    elif(fullcaps=="on"):
+        analyzed = ""
+        for char in retext:
+            analyzed = analyzed + char.upper()
+        params = {'purpose': 'Changed to Upper Case', 'analyzed_text': analyzed}
+        return render(request, 'analyze.html', params)
+
+    elif(newlineremover=="on"):
+        analyzed = ""
+        for char in retext:
+            if char !="\n":
+                analyzed = analyzed + char
+        params = {'purpose': 'New Remove lines', 'analyzed_text': analyzed}
+        return render(request, 'analyze.html', params)
+
+    elif (extraspaceremover == "on"):
+        analyzed = ""
+        charcount=0
+        for index,char in enumerate(retext):
+            if not(retext[index] == " " and retext[index+1]==" "):
+                analyzed = analyzed + char
+                if(char!=" "):
+                    charcount+=1
+        params = {'purpose': 'Extra Space Remover', 'analyzed_text': analyzed, 'charcount': charcount}
+        return render(request, 'analyze.html', params)
+
+    else:
+        return HttpResponse("Error")
